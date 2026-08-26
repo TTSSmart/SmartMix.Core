@@ -10,4 +10,8 @@
     <Folder Include="Abstractions\Plc\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SmartMix.Core.Domain\SmartMix.Core.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

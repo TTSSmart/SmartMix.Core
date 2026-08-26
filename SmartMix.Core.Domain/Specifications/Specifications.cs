@@ -1,0 +1,10 @@
+using SmartMix.Core.Domain.Entities;
+
+namespace SmartMix.Core.Domain.Specifications;
+
+public interface ISpecification<in T> { bool IsSatisfiedBy(T candidate); string GetFailureReason(T candidate); }
+public static class SpecificationExtensions { public static ISpecification<T> And<T>(this ISpecification<T> left, ISpecification<T> right) => new AndSpecification<T>(left, right); }
+public sealed class AndSpecification<T>(ISpecification<T> left, ISpecification<T> right) : ISpecification<T> { public bool IsSatisfiedBy(T candidate) => left.IsSatisfiedBy(candidate) && right.IsSatisfiedBy(candidate); public string GetFailureReason(T candidate) => !left.IsSatisfiedBy(candidate) ? left.GetFailureReason(candidate) : right.GetFailureReason(candidate); }
+public static class BatchingSpecifications { public sealed class CanStartBatch : ISpecification<Application> { public bool IsSatisfiedBy(Application value) => !value.IsCompleted && !value.IsDeleted && !value.IsEditLock && value.Volume.CubicMeters > 0 && value.Layers.Any(x => x.Recipe is not null); public string GetFailureReason(Application value) => value.IsCompleted ? "Заявка завершена" : "Заявка недоступна для запуска"; } public sealed class RecipeValidForProduction : ISpecification<Recipe> { public bool IsSatisfiedBy(Recipe value) => Services.RecipeCalculator.ValidateRecipe(value).IsValid; public string GetFailureReason(Recipe value) => Services.RecipeCalculator.ValidateRecipe(value).ToString(); } }
+public sealed class CanStartBatch : ISpecification<Application> { private readonly BatchingSpecifications.CanStartBatch _inner = new(); public bool IsSatisfiedBy(Application value) => _inner.IsSatisfiedBy(value); public string GetFailureReason(Application value) => _inner.GetFailureReason(value); }
+public sealed class RecipeValidForProduction : ISpecification<Recipe> { private readonly BatchingSpecifications.RecipeValidForProduction _inner = new(); public bool IsSatisfiedBy(Recipe value) => _inner.IsSatisfiedBy(value); public string GetFailureReason(Recipe value) => _inner.GetFailureReason(value); }

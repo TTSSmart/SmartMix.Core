@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using SmartMix.Core.Common.WinApi.Enums;
+using SmartMix.Core.Common.WinApi.Structures;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SmartMix.Core.Common.WinApi
 {
